@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200&display=swap" rel="stylesheet">
+    <title>Zмейка</title>
+    <style>
+        body{
+            background: #212529;
+        }
+      #holst {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .counter{
+        position: absolute;
+        color: white;
+        top: 25%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 30px;
+        font-family: 'Montserrat';
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="holst" width="400" height="400"></canvas>
+    <div class="counter"><span id="counter">0 </span><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-basket" viewBox="0 0 16 16">
+  <path d="M5.757 1.071a.5.5 0 0 1 .172.686L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1v4.5a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 1 13.5V9a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h1.217L5.07 1.243a.5.5 0 0 1 .686-.172zM2 9v4.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V9H2zM1 7v1h14V7H1zm3 3a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3A.5.5 0 0 1 4 10zm2 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3A.5.5 0 0 1 6 10zm2 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3A.5.5 0 0 1 8 10zm2 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5zm2 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 1 .5-.5z"/>
+</svg></div>
+    <script>
+      let counter = 0
+      let speedx = 10;
+      let speedy = 0;
+
+      const LEFT_KEY = 37
+      const RIGHT_KEY = 39
+      const UP_KEY = 38 
+      const DOWN_KEY = 40
+
+      function keyPress(event){
+        const Down = speedy == 10
+        const Up = speedy == -10
+        const Left = speedx == -10
+        const Right = speedx == 10
+        if (event.keyCode === LEFT_KEY && !Right){
+          speedx = -10
+          speedy = 0
+        }
+        if (event.keyCode === RIGHT_KEY && !Left){
+          speedx = 10
+          speedy = 0
+        }
+        if (event.keyCode === UP_KEY && !Down){
+          speedy = -10
+          speedx = 0
+        }
+        if (event.keyCode === DOWN_KEY && !Up){
+          speedx = 0
+          speedy = 10
+        }
+      }
+      document.addEventListener('keydown', keyPress)
+      const holst = document.getElementById("holst");
+      const context = holst.getContext("2d");
+      const snake = [{x:200, y:200}, //хвост
+                    {x:210, y:200}, 
+                    {x:220, y:200},   
+                    {x:230, y:200}, 
+                    {x:240, y:200}] //голова
+      
+      clearHolst();// очищаем холст
+      drawZmeika();// создаём 1-ую часть змеи
+
+      setInterval(() => {
+        if (snake[snake.length - 1].x == 400){
+            snake[snake.length - 1].x = 0
+        }
+        if (snake[snake.length - 1].x == -10){
+            snake[snake.length - 1].x = 400
+        }
+        if (snake[snake.length - 1].y == 400){
+            snake[snake.length - 1].y = 0
+        }
+        if (snake[snake.length - 1].y == -10) {
+            snake[snake.length - 1].y = 400
+        }
+
+        if (snake[snake.length - 1].x == cordX && snake[snake.length - 1].y == cordY) {
+            cordX = getRandomInt(0,40) * 10;
+            cordY = getRandomInt(0,40) * 10;
+            counter++
+            snake.push({x: snake[snake.length-1].x + speedx, y: snake[snake.length-1].y + speedy})
+            document.getElementById('counter').innerText = `${counter} `
+        } 
+        else {
+        RunZmeika()
+        clearHolst();
+        drawZmeika();
+        createFood()}
+      }, 100) 
+        
+        
+        let cordX = getRandomInt(0,41) * 10;
+        let cordY = getRandomInt(0,41) * 10;
+        
+
+      function getRandomInt(min, max) {
+         min = Math.ceil(min);
+         max = Math.floor(max);
+         return Math.floor(Math.random() * (max - min)) + min;}
+
+      function createFood() {
+        context.fillStyle = "#B20000";
+        context.strokestyle = "black";
+
+        context.fillRect(cordX, cordY, 10, 10);
+        context.strokeRect(cordX, cordY, 10, 10);
+      }
+
+      function RunZmeika(){
+        const head = snake[snake.length - 1]
+        snake.push({x: head.x + speedx, y: head.y + speedy})
+        snake.shift()
+        
+        }
+      function drawZmeika(){
+        
+        snake.forEach(creatZmeika)
+        
+      }
+
+      function creatZmeika(part){
+        context.fillStyle = "#00ff00";
+        context.strokeStyle = "black";
+        context.fillRect(part.x, part.y, 10, 10);
+        context.strokeRect(part.x, part.y, 10, 10);
+      }
+
+
+      function clearHolst() {
+        context.fillStyle = "#212529";
+        context.strokeStyle = "white";
+        context.fillRect(0, 0, 400, 400);
+        context.strokeRect(0, 0, 400, 400);
+      }
+    </script>
+  </body>
+</html>
